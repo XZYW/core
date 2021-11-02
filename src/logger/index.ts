@@ -3,6 +3,7 @@ import minimist from 'minimist';
 import get from 'lodash.get';
 const prettyoutput = require('prettyoutput');
 import ansiEscapes from 'ansi-escapes';
+import ora from 'ora';
 
 // CLI Colors
 const white = (str) => str;
@@ -36,6 +37,13 @@ export interface ILogger {
   debug: (...data: any[]) => any;
   warn: (...data: any[]) => any;
   error: (...data: any[]) => any;
+  output: (outputs: any, indent?: number) => any;
+  task: (title: string, option: ITaskOptions[]) => boolean;
+}
+
+interface ITaskOptions {
+  title: string;
+  task: () => Promise<any>;
 }
 
 const args = minimist(process.argv.slice(2));
@@ -144,5 +152,37 @@ export class Logger {
         ),
       ),
     );
+  }
+
+  static output(outputs, indent = 0) {
+    this.output(outputs, indent);
+  }
+
+  async task(title: string, list: ITaskOptions[]) {
+    const plist = [];
+    for (const item of list) {
+      if (item.title && item.task) {
+        const vm = ora(gray(item.title) + '\r\n').start();
+        try {
+          await item.task();
+          vm.stop();
+          plist.push(true);
+        } catch (error) {
+          vm.stop();
+          plist.push(false);
+          break;
+        }
+      }
+    }
+    if (plist.every((obj) => obj)) {
+      ora().succeed(`${title} succeed`);
+      return true;
+    } else {
+      ora().fail(`${title} fail`);
+      return false;
+    }
+  }
+  static async task(title: string, list: ITaskOptions[]) {
+    await this.task(title, list);
   }
 }
