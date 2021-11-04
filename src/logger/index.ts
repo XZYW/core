@@ -80,6 +80,8 @@ function formatDebugData(data: string) {
 }
 
 const gray = chalk.hex('#8c8d91');
+const bgRed = chalk.hex('#000').bgHex('#fd5750');
+
 const time = () => new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 export class Logger {
   context: string;
@@ -162,15 +164,28 @@ export class Logger {
     const plist = [];
     for (const item of list) {
       if (item.title && item.task) {
-        const vm = ora(gray(item.title) + '\r\n').start();
-        try {
-          await item.task();
-          vm.stop();
-          plist.push(true);
-        } catch (error) {
-          vm.stop();
-          plist.push(false);
-          break;
+        if (getEnableDebug()) {
+          this.log(gray(item.title));
+          try {
+            await item.task();
+            plist.push(true);
+          } catch (error) {
+            const index = error.stack.indexOf(':');
+            this.log(bgRed(error.stack.slice(0, index + 1)) + error.stack.slice(index + 1));
+            plist.push(false);
+            break;
+          }
+        } else {
+          const vm = ora(gray(item.title)).start();
+          try {
+            await item.task();
+            vm.stop();
+            plist.push(true);
+          } catch (error) {
+            vm.stop();
+            plist.push(false);
+            break;
+          }
         }
       }
     }

@@ -7,11 +7,13 @@ function sleep(timer: number) {
 
 (async () => {
   const logger = new Logger('S-CORE');
+
   
   await logger.task('test title111111', [
     {
       title: 'Checking git status',
       task: async()=>{
+        logger.debug('debug message')
         await sleep(1000)
       },
     },
@@ -34,13 +36,13 @@ function sleep(timer: number) {
       title: 'Checking git status',
       task: async()=>{
         await sleep(1000)
-        throw new Error('Unclean working tree. Commit or stash changes first.');
       },
     },
     {
       title: 'Checking remote history',
       task: async()=>{
         await sleep(1000)
+        throw new Error('Unclean working tree. Commit or stash changes first.');
       },
     },
     {
