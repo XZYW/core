@@ -3,7 +3,6 @@ export { default as request } from './request';
 export { default as downloadRequest } from './downloadRequest';
 export { default as reportComponent } from './reportComponent';
 export { default as spinner } from './spinner';
-export { default as zip } from './zip';
 export { default as help } from './help';
 export { loadComponent, load, loadApplication } from './load';
 export { default as commandParse } from './commandParse';

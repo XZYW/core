@@ -6,6 +6,7 @@ import { ProgressService, ProgressType } from '@serverless-devs/s-progress-bar';
 import path from 'path';
 import ignore from 'ignore';
 import readline from 'readline';
+import signore from './ignore';
 const processCwd = process.cwd();
 
 const isWindows = process.platform === 'win32';
@@ -16,11 +17,23 @@ interface Options {
   include?: Array<string>;
   outputFileName?: string;
   outputFilePath?: string;
+  componentName?: string;
 }
 
 async function zip(options: Options) {
-  const { codeUri, exclude, include, outputFileName, outputFilePath = './' } = options;
-
+  const {
+    codeUri,
+    exclude: myexclude,
+    include,
+    outputFileName,
+    outputFilePath = './',
+    componentName,
+  } = options;
+  const signoreList = signore(codeUri, componentName);
+  const exclude = []
+    .concat(myexclude)
+    .concat(signoreList)
+    .filter((item) => Boolean(item));
   let fileName: string;
   if (outputFileName) {
     fileName = outputFileName.includes('.') ? outputFileName : `${outputFileName}.zip`;

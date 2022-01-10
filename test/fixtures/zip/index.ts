@@ -1,8 +1,14 @@
-import { zip, unzip } from '../../../src/common';
+import * as core from '../../../src';
+
+console.log(core.ignore('./demo', 'fc'));
+
+
+
+
 
 class ZipDemo {
   async testZip() {
-    await zip({
+    await core.zip({
       codeUri: './demo',
       include: ['../spinner.ts'],
       exclude: ['a.md'],
@@ -10,11 +16,8 @@ class ZipDemo {
       outputFileName: 'provider',
       // exclude: ['./demo/dir'],
       outputFilePath: './zipdist',
+      componentName:'fc'
     });
-  }
-  async testUnzip() {
-    await unzip('./zipdist/provider.zip', 'unzip-dist');
-    console.log('done!');
   }
 }
 
@@ -22,4 +25,3 @@ const demo = new ZipDemo();
 
 demo.testZip();
 
-// demo.testUnzip();
