@@ -20,10 +20,12 @@ export interface IOptions extends DecompressOptions {
 
 async function download(url: string, dest: string, options: IOptions = {}) {
   const { filename = 'demo.zip' } = options;
+  console.log('url', url);
   const uri = new URL(url);
   const pkg = url.toLowerCase().startsWith('https:') ? https : http;
   return await new Promise<{ filePath: string; spin: Ora }>((resolve, reject) => {
     pkg.get(uri.href).on('response', (res) => {
+      console.log('res', res.statusCode, res.headers);
       const len = parseInt(res.headers['content-length'], 10);
       fs.ensureDirSync(dest);
       const filePath = path.join(dest, filename);
@@ -47,7 +49,8 @@ async function download(url: string, dest: string, options: IOptions = {}) {
           .on('error', (err) => {
             file.destroy();
             spin.fail();
-            fs.unlink(dest, () => reject(err));
+            reject(err);
+            // fs.unlink(dest, () => reject(err));
           });
       } else if (res.statusCode === 302 || res.statusCode === 301) {
         // Recursively follow redirects, only a 200 will resolve.
@@ -66,6 +69,8 @@ export default async (url: string, dest: string, options: IOptions = {}) => {
   const { extract, filename, ...restOpts } = options;
   try {
     const { filePath, spin } = await download(url, dest, options);
+    console.log(filePath, 'filePath');
+
     if (extract) {
       let timer;
       let num = 0;
@@ -82,7 +87,7 @@ export default async (url: string, dest: string, options: IOptions = {}) => {
         try {
           await decompress(filePath, dest, restOpts);
           clearInterval(timer);
-          await fs.unlink(filePath);
+          // await fs.unlink(filePath);
           const text = 'file decompression completed';
           spin.succeed(filename ? `${filename} ${text}` : text);
           break;
